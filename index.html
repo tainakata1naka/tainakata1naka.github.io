@@ -7,22 +7,32 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h1>レイノルズ数計算</h1>
-  <form id="reynoldsForm">
-    <label for="velocity">流速 (m/s):</label>
-    <input type="number" id="velocity" required><br>
-    <label for="dimension">特性長 (m):</label>
-    <input type="number" id="dimension" required><br>
-    <label for="kinematicViscosity">動粘性係数 (m²/s):</label>
-    <input type="number" id="kinematicViscosity" step="0.000001" required><br>
-    <button type="submit">計算</button>
-  </form>
-  <div id="result"></div>
-
-  <h2>履歴</h2>
-  <div id="history"></div>
-  <button id="clearHistory">履歴を削除</button>
-
+  <header>
+    <h1>レイノルズ数計算サイト</h1>
+  </header>
+  <main>
+    <section id="calculator">
+      <h2>計算フォーム</h2>
+      <form id="reynoldsForm">
+        <label for="velocity">流速 (m/s):</label>
+        <input type="number" id="velocity" required><br>
+        <label for="dimension">特性長 (m):</label>
+        <input type="number" id="dimension" required><br>
+        <label for="kinematicViscosity">動粘性係数 (m²/s):</label>
+        <input type="number" id="kinematicViscosity" step="0.000001" required><br>
+        <button type="submit">計算</button>
+      </form>
+      <div id="result"></div>
+    </section>
+    <section id="historySection">
+      <h2>計算履歴</h2>
+      <div id="history"></div>
+      <button id="clearHistory">履歴を削除</button>
+    </section>
+  </main>
+  <footer>
+    <p>&copy; 2024 レイノルズ数計算サイト</p>
+  </footer>
   <script src="script.js"></script>
 </body>
 </html>
