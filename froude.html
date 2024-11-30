@@ -33,8 +33,8 @@
 
   <main class="container mt-4">
     <section id="calculator" class="bg-white p-4 rounded shadow">
-      <h2 class="mb-3">Calculate Reynolds Number</h2>
-      <form id="reynoldsForm">
+      <h2 class="mb-3">Calculate Froude Number</h2>
+      <form id="froudeForm">
         <div class="mb-3">
           <label for="velocity" class="form-label">代表速度 :</label>
           <input type="number" id="velocity" class="form-control" required>
@@ -45,33 +45,12 @@
           <input type="number" id="dimension" class="form-control" required>
         </div>
 
-        <div class="mb-3">
-          <div class="btn-group" role="group" aria-label="Parameter Type">
-            <input type="radio" class="btn-check" id="kinematicViscosityOption" name="parameterType" value="kinematicViscosity" checked>
-            <label class="btn btn-outline-primary" for="kinematicViscosityOption">動粘度</label>
-        
-            <input type="radio" class="btn-check" id="viscosityAndDensityOption" name="parameterType" value="viscosityAndDensity">
-            <label class="btn btn-outline-primary" for="viscosityAndDensityOption">粘度 & 密度</label>
-          </div>
-        </div>
-        
-        <div id="kinematicViscosityInput" class="mb-3">
-          <label for="kinematicViscosity" class="form-label">動粘度 :</label>
-          <input type="number" id="kinematicViscosity" class="form-control" step="0.000001" required>
-        </div>
-
-        <div id="viscosityAndDensityInput" class="mb-3" style="display: none;">
-          <label for="viscosity" class="form-label">粘度 :</label>
-          <input type="number" id="viscosity" class="form-control" step="0.000001">
-          <label for="density" class="form-label mt-2">密度 :</label>
-          <input type="number" id="density" class="form-control">
-        </div>
-
         <div class="mb-3 mt-3">
           <label for="memo" class="form-label">メモ (最大30文字) :</label>
           <input type="text" id="memo" class="form-control" maxlength="30">
         </div>
-
+        <br>
+        
         <button id="calculateButton" class="btn btn-primary btn-lg w-100" disabled>計算</button>
       </form>
       <div id="result" class="alert alert-info" style="display: none;"></div>
@@ -83,12 +62,10 @@
       <button id="clearSelected" class="btn btn-danger" disabled>選択した履歴を削除</button>
     </section>    
 
-    <footer class="text-left fixed-bottom w-100">
+    <div class="mb-4"></div> <footer class="text-left fixed-bottom w-100">
       <p>&copy; 2024 Fluid Calculator</p>
     </footer>
-  </main>
-
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
-  <script src="reynolds.js"></script>
+  <script src="froude.js"></script>
 </body>
 </html>
