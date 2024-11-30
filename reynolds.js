@@ -99,12 +99,16 @@ const viscosityAndDensityInput = document.getElementById('viscosityAndDensityInp
 function validateInputs() {
   let isValid = velocity.value > 0 && dimension.value > 0;
 
+  // 動粘度が選択されている場合、動粘度の入力が有効かチェック
   if (kinematicViscosityInput.style.display === 'block') {
     isValid = isValid && kinematicViscosity.value > 0;
-  } else if (viscosityAndDensityInput.style.display === 'block') {
+  } 
+  // 粘度と密度が選択されている場合、粘度と密度の両方の入力が有効かチェック
+  else if (viscosityAndDensityInput.style.display === 'block') {
     isValid = isValid && viscosity.value > 0 && density.value > 0;
   }
 
+  // 計算ボタンの有効・無効を設定
   calculateButton.disabled = !isValid;
 }
 
