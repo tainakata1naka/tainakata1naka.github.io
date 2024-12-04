@@ -10,6 +10,40 @@ function getFormattedTimestamp() {
     return `${year}/${month}/${day} ${hours}:${minutes}:${seconds}`;
 }
 
+// 有効数字を計算する関数
+function countSignificantFigures(value) {
+    if (isNaN(value) || value === 0) return 0;
+    const normalized = Number(value).toExponential();
+    const significantPart = normalized.split('e')[0].replace('.', '').replace('-', '');
+    return significantPart.length;
+}
+  
+// 入力値から最大の有効数字を計算する関数
+function getMaxSignificantFigures() {
+const velocityValue = parseFloat(document.getElementById('velocity').value);
+const dimensionValue = parseFloat(document.getElementById('dimension').value);
+
+// 入力値の有効数字を計算
+const significantFigures = [
+    countSignificantFigures(velocityValue),
+    countSignificantFigures(dimensionValue),
+];
+
+// 有効数字の最大値を返す
+return Math.max(...significantFigures);
+}
+
+// フルード数のから流れの状態を判定する関数
+function getFroudeState(froudeNumber) {
+    if (froudeNumber > 1) {
+        return '超臨界流';
+    } else if (froudeNumber < 1) {
+        return '亜臨界流';
+    } else {
+        return '臨界状態';
+    }
+}
+
 // フォーム送信時のイベントリスナー
 document.getElementById('froudeForm').addEventListener('submit', function (e) {
     e.preventDefault(); // デフォルトのフォーム送信を防ぐ
@@ -23,16 +57,25 @@ document.getElementById('froudeForm').addEventListener('submit', function (e) {
     // フルード数の計算
     const froudeNumber = velocity / Math.sqrt(dimension * gravitationalAcceleration);
 
+    // 最大有効数字を取得
+    const maxSigFigs = getMaxSignificantFigures();
+
+    // 有効数字に基づいてフルード数をフォーマット
+    const formattedFroudeNumber = froudeNumber.toPrecision(maxSigFigs);
+
+    // フルード数の状態を判定
+    const froudeState = getFroudeState(froudeNumber);
+
     // 結果の表示
     const resultElement = document.getElementById('result');
-    resultElement.textContent = `フルード数: ${froudeNumber.toFixed(2)}`;
+    resultElement.textContent = `フルード数: ${formattedFroudeNumber} (${froudeState})`;
 
     // 現在時刻の取得
     const timestamp = getFormattedTimestamp();
 
     // 履歴をローカルストレージに保存
     const history = JSON.parse(localStorage.getItem('froudeHistory')) || [];
-    history.push({ froude: froudeNumber.toFixed(2), time: timestamp, memo: memo });
+    history.push({ froude: formattedFroudeNumber, time: timestamp, memo: memo, state: froudeState });
     localStorage.setItem('froudeHistory', JSON.stringify(history));
 
     // 履歴を更新表示
@@ -88,6 +131,7 @@ function displayHistory() {
             <th scope="col"><input type="checkbox" id="selectAll"></th>
             <th scope="col">計算時刻</th>
             <th scope="col">フルード数</th>
+            <th scope="col">状態</th>
             <th scope="col">メモ</th>
         </tr>`;
         table.appendChild(thead);
@@ -100,6 +144,7 @@ function displayHistory() {
             <td><input type="checkbox" class="select-row" data-index="${index}"></td>
             <td>${entry.time}</td>
             <td>${entry.froude}</td>
+            <td>${entry.state}</td>
             <td>${entry.memo || 'なし'}</td>`;
             tbody.appendChild(row);
 

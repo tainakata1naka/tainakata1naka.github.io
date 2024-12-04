@@ -210,6 +210,9 @@ function displayHistory() {
   // 履歴テーブルのクリア
   historyElement.innerHTML = '';
 
+  // 履歴を逆順にして新しい順に表示
+  history.reverse();
+
   if (history.length > 0) {
     const table = document.createElement('table');
     table.classList.add('table', 'table-striped', 'table-hover', 'mb-3');
