@@ -26,6 +26,47 @@ function getFormattedTimestamp() {
   return `${year}/${month}/${day} ${hours}:${minutes}:${seconds}`;
 }
 
+// 層流か乱流を判定する関数
+function getFlowType(reynoldsNumber) {
+  return reynoldsNumber <= 2300 ? '層流' : '乱流';
+}
+
+// 有効数字を計算する関数
+function countSignificantFigures(value) {
+  if (isNaN(value) || value === 0) return 0;
+  const normalized = Number(value).toExponential();
+  const significantPart = normalized.split('e')[0].replace('.', '').replace('-', '');
+  return significantPart.length;
+}
+
+// 入力値から最大の有効数字を計算する関数
+function getMaxSignificantFigures() {
+  const velocityValue = parseFloat(document.getElementById('velocity').value);
+  const dimensionValue = parseFloat(document.getElementById('dimension').value);
+  const kinematicViscosityValue = parseFloat(document.getElementById('kinematicViscosity').value);
+  const viscosityValue = parseFloat(document.getElementById('viscosity').value);
+  const densityValue = parseFloat(document.getElementById('density').value);
+
+  // 入力値の有効数字を計算
+  const significantFigures = [
+    countSignificantFigures(velocityValue),
+    countSignificantFigures(dimensionValue),
+  ];
+
+  // 動粘度が選択されている場合
+  if (document.getElementById('kinematicViscosityInput').style.display === 'block') {
+    significantFigures.push(countSignificantFigures(kinematicViscosityValue));
+  }
+  // 粘度と密度が選択されている場合
+  else if (document.getElementById('viscosityAndDensityInput').style.display === 'block') {
+    significantFigures.push(countSignificantFigures(viscosityValue));
+    significantFigures.push(countSignificantFigures(densityValue));
+  }
+
+  // 有効数字の最大値を返す
+  return Math.max(...significantFigures);
+}
+
 // フォーム送信時のイベントリスナー
 document.getElementById('reynoldsForm').addEventListener('submit', function (e) {
   e.preventDefault(); // デフォルトのフォーム送信を防ぐ
@@ -53,19 +94,24 @@ document.getElementById('reynoldsForm').addEventListener('submit', function (e) 
   // レイノルズ数の計算
   const reynoldsNumber = (velocity * dimension) / kinematicViscosity;
 
+  // 最大有効数字を取得
+  const maxSigFigs = getMaxSignificantFigures();
+
+  // 有効数字に基づいてレイノルズ数をフォーマット
+  const formattedReynoldsNumber = reynoldsNumber.toPrecision(maxSigFigs);
+
   // メモの取得
   const memo = document.getElementById('memo').value;
 
-  // 結果の表示
-  const resultElement = document.getElementById('result');
-  resultElement.textContent = `レイノルズ数: ${reynoldsNumber.toFixed(2)}`;
+  // 層流または乱流を判定
+  const flowType = reynoldsNumber <= 2300 ? "層流" : "乱流";
 
   // 現在時刻の取得
   const timestamp = getFormattedTimestamp();
 
   // 履歴をローカルストレージに保存
   const history = JSON.parse(localStorage.getItem('reynoldsHistory')) || [];
-  history.push({ reynolds: reynoldsNumber.toFixed(2), time: timestamp, memo: memo });
+  history.push({ reynolds: formattedReynoldsNumber, flowType, time: timestamp, memo });
   localStorage.setItem('reynoldsHistory', JSON.stringify(history));
 
   // 履歴を更新表示
@@ -95,7 +141,10 @@ const density = document.getElementById('density');
 const calculateButton = document.getElementById('calculateButton');
 const kinematicViscosityInput = document.getElementById('kinematicViscosityInput');
 const viscosityAndDensityInput = document.getElementById('viscosityAndDensityInput');
+const kinematicViscosityOption = document.getElementById('kinematicViscosityOption'); // 動粘度選択ラジオボタン
+const viscosityAndDensityOption = document.getElementById('viscosityAndDensityOption'); // 粘度 & 密度選択ラジオボタン
 
+// 入力フィールドの検証
 function validateInputs() {
   let isValid = velocity.value > 0 && dimension.value > 0;
 
@@ -117,6 +166,42 @@ document.querySelectorAll('input').forEach(input => {
   input.addEventListener('input', validateInputs);
 });
 
+// 動粘度と粘度・密度の選択肢が変更された場合の処理
+kinematicViscosityOption.addEventListener('change', () => {
+  if (kinematicViscosityOption.checked) {
+    // 動粘度が選択された場合
+    kinematicViscosityInput.style.display = 'block';
+    viscosityAndDensityInput.style.display = 'none';
+  }
+  // 入力を検証
+  validateInputs();
+});
+
+viscosityAndDensityOption.addEventListener('change', () => {
+  if (viscosityAndDensityOption.checked) {
+    // 粘度と密度が選択された場合
+    kinematicViscosityInput.style.display = 'none';
+    viscosityAndDensityInput.style.display = 'block';
+  }
+  // 入力を検証
+  validateInputs();
+});
+
+// 初期状態でボタンの状態をチェック
+window.addEventListener('load', () => {
+  if (kinematicViscosityOption.checked) {
+    // 最初に動粘度が選択されている場合
+    kinematicViscosityInput.style.display = 'block';
+    viscosityAndDensityInput.style.display = 'none';
+  } else if (viscosityAndDensityOption.checked) {
+    // 最初に粘度と密度が選択されている場合
+    kinematicViscosityInput.style.display = 'none';
+    viscosityAndDensityInput.style.display = 'block';
+  }
+  // 初期状態での検証を実行
+  validateInputs();
+});
+
 // 履歴を表示する関数
 function displayHistory() {
   const history = JSON.parse(localStorage.getItem('reynoldsHistory')) || [];
@@ -136,6 +221,7 @@ function displayHistory() {
         <th scope="col"><input type="checkbox" id="selectAll"></th>
         <th scope="col">計算時刻</th>
         <th scope="col">レイノルズ数</th>
+        <th scope="col">流体の状態</th>
         <th scope="col">メモ</th>
       </tr>`;
     table.appendChild(thead);
@@ -148,7 +234,8 @@ function displayHistory() {
         <td><input type="checkbox" class="select-row" data-index="${index}"></td>
         <td>${entry.time}</td>
         <td>${entry.reynolds}</td>
-        <td>${entry.memo || ''}</td>`; // メモを表示
+        <td>${entry.flowType}</td>
+        <td>${entry.memo || ''}</td>`;
 
       // 行にクリックイベントを追加
       row.addEventListener('click', function (e) {
